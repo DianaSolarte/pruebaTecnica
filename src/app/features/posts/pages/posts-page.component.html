@@ -1,0 +1,252 @@
+<!-- Container principal con gradiente de fondo -->
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+  <div class="container mx-auto px-4 py-8">
+
+    <!-- Header principal -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+        <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Gestión CRUD de Posts
+        </span>
+      </h1>
+      <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+        Crear, Consultar, Actualizar y Eliminar posts con JSONPlaceholder API
+      </p>
+    </div>
+
+    <!-- Barra de búsqueda -->
+    <div class="max-w-4xl mx-auto mb-8">
+      <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+        <div class="flex items-center space-x-4">
+          <div class="flex-1 relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              type="text"
+              placeholder="Buscar posts por título, contenido, ID o UserID..."
+              class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+              (input)="search($event)"
+              [value]="searchTerm()"
+            >
+          </div>
+          <button
+            type="button"
+            (click)="clearSearch()"
+            class="px-4 py-3 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors"
+            [disabled]="!searchTerm()"
+          >
+            Limpiar
+          </button>
+          <button
+            type="button"
+            (click)="loadAll()"
+            class="px-4 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors flex items-center space-x-2"
+            [disabled]="loading()"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>Recargar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensaje de estado -->
+    <div *ngIf="message()" class="mb-6 max-w-4xl mx-auto">
+      <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg shadow-sm">
+        <p class="text-blue-700 font-medium">{{ message() }}</p>
+      </div>
+    </div>
+
+    <!-- Layout principal -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
+
+      <!-- Formulario (1/3 del ancho en xl) -->
+      <div class="xl:col-span-1">
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden sticky top-8">
+          <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+            <h2 class="text-xl font-semibold text-white flex items-center">
+              <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              {{ isEditing() ? 'Editar Post' : 'Nuevo Post' }}
+            </h2>
+          </div>
+
+          <form [formGroup]="form" class="p-6 space-y-6">
+            <!-- Título -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Título del Post *
+              </label>
+              <input
+                type="text"
+                formControlName="title"
+                placeholder="Ingrese el título del post"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                [class.border-red-500]="form.get('title')?.invalid && form.get('title')?.touched"
+              >
+              <div *ngIf="form.get('title')?.invalid && form.get('title')?.touched" class="mt-1 text-sm text-red-600">
+                El título es requerido (máx. 100 caracteres)
+              </div>
+            </div>
+
+            <!-- Contenido -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Contenido del Post *
+              </label>
+              <textarea
+                formControlName="body"
+                placeholder="Escriba el contenido del post..."
+                rows="4"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                [class.border-red-500]="form.get('body')?.invalid && form.get('body')?.touched"
+              ></textarea>
+              <div *ngIf="form.get('body')?.invalid && form.get('body')?.touched" class="mt-1 text-sm text-red-600">
+                El contenido es requerido (máx. 500 caracteres)
+              </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="flex flex-col space-y-3">
+              <button
+                type="button"
+                (click)="isEditing() ? update() : create()"
+                [disabled]="form.invalid || loading()"
+                class="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center space-x-2"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        [attr.d]="isEditing() ? 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' : 'M12 6v6m0 0v6m0-6h6m-6 0H6'" />
+                </svg>
+                <span>{{ isEditing() ? 'Actualizar Post' : 'Crear Post' }}</span>
+              </button>
+
+              <button
+                *ngIf="isEditing()"
+                type="button"
+                (click)="cancelEdit()"
+                class="w-full py-3 px-4 bg-gray-500 text-white font-semibold rounded-xl hover:bg-gray-600 transition-colors flex items-center justify-center space-x-2"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span>Cancelar</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Tabla de Posts (2/3 del ancho en xl) -->
+      <div class="xl:col-span-2">
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          <div class="bg-gradient-to-r from-green-500 to-blue-600 px-6 py-4">
+            <h2 class="text-xl font-semibold text-white flex items-center">
+              <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              Lista de Posts ({{ posts().length }})
+            </h2>
+          </div>
+
+          <!-- Loading State -->
+          <div *ngIf="loading()" class="p-8 text-center">
+            <div class="inline-flex items-center space-x-2">
+              <svg class="animate-spin h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span class="text-gray-600">Cargando posts...</span>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="!loading() && posts().length === 0" class="p-8 text-center">
+            <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No hay posts</h3>
+            <p class="text-gray-500">{{ searchTerm() ? 'No se encontraron posts que coincidan con tu búsqueda' : 'Comienza creando tu primer post' }}</p>
+          </div>
+
+          <!-- Tabla con posts -->
+          <div *ngIf="!loading() && posts().length > 0" class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Usuario</th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Título</th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Contenido</th>
+                  <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr
+                  *ngFor="let post of posts(); trackBy: trackById"
+                  class="hover:bg-gray-50 transition-colors"
+                  [class.bg-blue-50]="editingPost()?.id === post.id"
+                >
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      #{{ post.id }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      User {{ post.userId }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="text-sm font-medium text-gray-900 truncate max-w-xs" [title]="post.title">
+                      {{ post.title }}
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="text-sm text-gray-600 truncate max-w-md" [title]="post.body">
+                      {{ post.body }}
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-center">
+                    <div class="flex items-center justify-center space-x-2">
+                      <!-- Botón Editar -->
+                      <button
+                        (click)="editPost(post)"
+                        class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg text-blue-600 bg-blue-100 hover:bg-blue-200 transition-colors"
+                        [disabled]="loading()"
+                      >
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Editar
+                      </button>
+
+                      <!-- Botón Eliminar -->
+                      <button
+                        (click)="delete(post)"
+                        class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg text-red-600 bg-red-100 hover:bg-red-200 transition-colors"
+                        [disabled]="loading()"
+                      >
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H9a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
