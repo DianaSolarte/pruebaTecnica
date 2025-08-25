@@ -6,11 +6,12 @@
     <div class="text-center mb-8">
       <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
         <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Gestión CRUD de Posts
+          Gestión CRUD de Posts para Annar Health Technologies
         </span>
       </h1>
       <p class="text-gray-600 text-lg max-w-2xl mx-auto">
         Crear, Consultar, Actualizar y Eliminar posts con JSONPlaceholder API
+
       </p>
     </div>
 
@@ -26,7 +27,7 @@
             </div>
             <input
               type="text"
-              placeholder="Buscar posts por título, contenido, ID o UserID..."
+              placeholder="Buscar posts por título,ID..."
               class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
               (input)="search($event)"
               [value]="searchTerm()"

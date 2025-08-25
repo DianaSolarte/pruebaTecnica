@@ -41,7 +41,7 @@ export class PostsPage implements OnInit {
   // Campo de búsqueda independiente
   searchTerm = signal('');
 
-  // Post en edición (null = modo crear)
+  // Post en edición
   editingPost = signal<Post | null>(null);
 
   // Estados de la UI
@@ -54,9 +54,7 @@ export class PostsPage implements OnInit {
     this.loadAll();
   }
 
-  // =====================================
   // OPERACIONES CRUD
-  // =====================================
 
   /**
    * READ - Cargar todos los posts
@@ -91,7 +89,7 @@ export class PostsPage implements OnInit {
 
     // Crear post con UserID automático (1) y sin ID
     const newPost: Post = {
-      userId: 1, // UserID fijo para simplificar
+      userId: 1,
       title: this.form.value.title!,
       body: this.form.value.body!
     };
@@ -174,9 +172,7 @@ export class PostsPage implements OnInit {
     });
   }
 
-  // =====================================
   // FUNCIONES DE LA TABLA
-  // =====================================
 
   /**
    * Editar post desde la tabla
@@ -206,9 +202,8 @@ export class PostsPage implements OnInit {
     this.message.set(null);
   }
 
-  // =====================================
   // FUNCIONES DE BÚSQUEDA
-  // =====================================
+
 
   /**
    * Buscar posts por término
@@ -234,9 +229,7 @@ export class PostsPage implements OnInit {
     this.message.set(null);
   }
 
-  // =====================================
   // HELPERS
-  // =====================================
 
   /**
    * Generar nuevo ID para posts creados localmente
