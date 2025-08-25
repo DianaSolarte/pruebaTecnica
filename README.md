@@ -128,7 +128,7 @@ src/
 
 1. **Clonar el repositorio**
 ```bash
-git clone [URL_DEL_REPOSITORIO]
+git clone [git@github.com:DianaSolarte/pruebaTecnica.git]
 cd angularLearn
 ```
 
